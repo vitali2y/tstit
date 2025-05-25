@@ -55,7 +55,7 @@ impl TestEngine {
         let mut cmd = Command::new("curl");
         let cmd = cmd
             .arg("-X")
-            .arg(self.plan.input.method.as_deref().unwrap_or("GET"))
+            .arg(self.plan.input.method.as_deref().unwrap_or_default())
             .arg("-d")
             .arg(self.plan.input.json.as_deref().unwrap_or(""))
             .arg("-H")
@@ -184,19 +184,23 @@ impl TestEngine {
     }
 
     fn compare_values(&self, value: &Value, expected: &str) -> Result<bool, Box<dyn Error>> {
-        match (value, expected) {
-            (Value::Number(n), _) if expected.starts_with('>') => {
-                let threshold = expected[1..].parse::<f64>()?;
-                Ok(n.as_f64().unwrap_or(0.0) > threshold)
+        match value {
+            Value::Number(n) => {
+                let actual = n.as_i64().ok_or("integer expected")?;
+                if expected.starts_with('>') {
+                    Ok(actual > expected[1..].parse::<i64>()?)
+                } else if expected.starts_with('<') {
+                    Ok(actual < expected[1..].parse::<i64>()?)
+                } else {
+                    Ok(actual == expected.parse::<i64>()?)
+                }
             }
-            (Value::Number(n), _) if expected.starts_with('<') => {
-                let threshold = expected[1..].parse::<f64>()?;
-                Ok(n.as_f64().unwrap_or(0.0) < threshold)
-            }
-            (Value::Number(n), _) => Ok(n.as_f64().unwrap_or(0.0) == expected.parse::<f64>()?),
-            (Value::String(s), _) => Ok(s == expected),
-            (Value::Bool(b), "true") => Ok(*b),
-            (Value::Bool(b), "false") => Ok(!*b),
+            Value::String(s) => Ok(s == expected),
+            Value::Bool(b) => match expected {
+                "true" => Ok(*b),
+                "false" => Ok(!*b),
+                _ => Ok(false),
+            },
             _ => Ok(false),
         }
     }
