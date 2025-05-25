@@ -9,7 +9,7 @@
 ➜  cargo r ./tests/ccs/customer/
 ~...~
      Running `target/debug/tstit ./tests/ccs/customer/`
-tstit v0.1.0 - Test It. REST It.
+tstit v0.2.0 - Test It. REST It.
  INFO  tstit > found 3 testplans
  INFO  tstit > processing ./tests/ccs/customer/customer_create.toml...
  ERROR tstit > testplan failed: API Error 17: "db error: failed to create customer: UNIQUE constraint failed: customer.contactemail"
