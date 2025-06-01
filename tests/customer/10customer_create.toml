@@ -1,0 +1,36 @@
+# input section
+[in]
+# possible `method`s: GET (default - so, might be omitted), POST, PATCH, PUT, DELETE
+method = "POST"
+url = "/v1/customer"
+# optional multiline JSON content
+# https://radaris.com/p/John/Dow/
+json = """
+{
+  "firstname": "John",
+  "lastname": "Dow",
+  "phone": "9365200167",
+  "contactemail": "John.Dow@tst.it",
+  "company": "Bestview",
+  "address": "PO Box 2177",
+  "city": "Willis",
+  "state": "TX",
+  "zip": 77378
+}
+"""
+
+# testplan section (optional)
+[plan]
+# used `executor` (optional): curl (default)
+# TODO: reqwest, xh, xh2jq, curl2jq
+executor = "curl"
+
+# output section
+[out]
+# # type of testplan result `validator` (code_data, raw - default)
+# validator = "code_data"
+# list of possible output expected patterns
+[out.expect]
+data = ">0"
+[out.assign]
+data = "$TSTIT_ID"

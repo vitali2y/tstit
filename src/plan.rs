@@ -1,27 +1,30 @@
 use serde::Deserialize;
 use std::{collections::HashMap, fmt, fs};
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 pub struct TestPlan {
     #[serde(rename = "in")]
     pub input: Input,
     #[serde(default)]
-    pub plan: Plan,
+    pub plan: crate::plan::Plan,
     #[serde(rename = "out")]
     pub output: Output,
 }
 
-#[derive(Deserialize, Debug, Default)]
-pub struct Plan {
-    #[serde(default = "default_exec")]
-    pub exec: String,
-}
-
-fn default_exec() -> String {
-    "curl".to_string()
-}
-
 #[derive(Deserialize, Debug)]
+pub struct Plan {
+    pub executor: String,
+}
+
+impl Default for crate::plan::Plan {
+    fn default() -> Self {
+        Self {
+            executor: "curl".to_string(),
+        }
+    }
+}
+
+#[derive(Deserialize, Debug, Default)]
 pub struct Input {
     #[serde(default = "default_method")]
     pub method: Option<String>,
@@ -33,9 +36,11 @@ fn default_method() -> Option<String> {
     Some("GET".to_string())
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 pub struct Output {
     pub expect: HashMap<String, String>,
+    #[serde(default)]
+    pub assign: Option<HashMap<String, String>>,
 }
 
 impl TestPlan {

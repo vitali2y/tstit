@@ -1,0 +1,10 @@
+[in]
+url = "/v1/customer/$TSTIT_ID"
+
+[out.expect]
+code = "0"
+firstname = "John$TSTIT_ID"
+lastname = "Dow$TSTIT_ID"
+phone = "9365200167"
+contactemail = "John.Dow@tst.it"
+company = "Bestview"

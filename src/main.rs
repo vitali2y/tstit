@@ -18,6 +18,9 @@ struct Args {
     #[argh(switch, short = 'v')]
     /// enable verbose output
     verbose: bool,
+    #[argh(switch, short = 'V', long = "version")]
+    /// print version information
+    version: bool,
 }
 
 fn main() -> Result<(), io::Error> {
@@ -30,6 +33,11 @@ fn main() -> Result<(), io::Error> {
             log::LevelFilter::Info
         })
         .init();
+
+    if args.version {
+        println!("{}", env!("CARGO_PKG_VERSION"),);
+        process::exit(0);
+    }
 
     if args.paths.is_empty() {
         error!("no testplan paths provided");
@@ -48,16 +56,21 @@ fn main() -> Result<(), io::Error> {
     for path in args.paths {
         collect_testplans(path, &mut testplans)?;
     }
-
     info!("found {} testplans", testplans.len());
+    if testplans.len() == 0 {
+        error!("no testplan(s) found");
+        process::exit(2);
+    }
+
     let mut success_count = 0;
     let mut fail_count = 0;
 
     for file_path in testplans {
         info!("processing {}...", file_path.display());
-        match TestPlan::load(&file_path.to_string_lossy())
-            .and_then(|plan| TestEngine::new(plan).execute())
-        {
+        match TestPlan::load(&file_path.to_string_lossy()).and_then(|plan| {
+            let mut engine = TestEngine::new(plan);
+            engine.execute()
+        }) {
             Ok(_) => {
                 info!("testplan succeeded");
                 success_count += 1;
@@ -84,5 +97,6 @@ fn collect_testplans(path: PathBuf, testplans: &mut Vec<PathBuf>) -> Result<(), 
             collect_testplans(entry?.path(), testplans)?;
         }
     }
+    testplans.sort();
     Ok(())
 }

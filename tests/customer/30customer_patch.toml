@@ -1,0 +1,13 @@
+[in]
+method = "PATCH"
+url = "/v1/customer/$TSTIT_ID"
+json = """
+{
+  "firstname": "John$TSTIT_ID",
+  "lastname": "Dow$TSTIT_ID"
+}
+"""
+
+[out.expect]
+code = "0"
+data = ">0"
